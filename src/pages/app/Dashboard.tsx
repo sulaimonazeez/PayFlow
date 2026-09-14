@@ -31,7 +31,7 @@ export default function Dashboard() {
     <div>
       <div className="mb-6">
         <p className="text-sm text-ink/50">Good afternoon,</p>
-        <h1 className="font-display text-xl font-semibold text-ink">Sulaimon 👋</h1>
+        <h1 className="font-display text-xl font-semibold text-ink">Azeez 👋</h1>
       </div>
 
       <WalletBalanceCard balance={balance} accountId="PayFlow • 8012345678" />
