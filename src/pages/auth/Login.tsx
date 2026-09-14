@@ -6,15 +6,11 @@ import { ROUTES } from "@/lib/routes";
 // Phase 1 mock: no backend yet, so the "logged in" phone number is hardcoded.
 // Phase 2 replaces this with the real mock auth service (see useAuthStore).
 const MOCK_PHONE = "+2348012345605";
-const PIN_LENGTH = 4;
+const PIN_LENGTH = 6;
 
 function maskPhone(phone: string) {
-  // +2348012345605 -> +234 80*******05
-  const country = phone.slice(0, 4); // "+234"
-  const start = phone.slice(4, 6); // "80"
-  const end = phone.slice(-2); // "05"
-  const middleLength = phone.length - 4 - 2 - 2;
-  return `${country} ${start}${"*".repeat(middleLength)}${end}`;
+  // +2348012345605 -> ***5605 (last 4 digits, matches design)
+  return `***${phone.slice(-4)}`;
 }
 
 function vibrate(pattern: number | number[]) {
@@ -69,30 +65,46 @@ export default function Login() {
     inputRef.current?.focus();
   };
 
-  return (
-    <div className="flex flex-col items-center pb-[env(safe-area-inset-bottom)]">
-      <h2 className="font-display text-lg font-semibold text-ink">Welcome back</h2>
-      <p className="mt-1 text-sm text-ink/60">Enter your PIN to continue</p>
+  const initials = "WO"; // Phase 2: derive from real user profile
 
-      <div className="mt-4 flex items-center gap-2">
-        <span className="text-sm font-medium text-ink">{maskPhone(MOCK_PHONE)}</span>
+  return (
+    <div className="flex min-h-screen flex-col items-center bg-slate-950 px-6 pb-[env(safe-area-inset-bottom)] pt-4">
+      {/* Top bar: back arrow + phone pill */}
+      <div className="flex w-full items-center justify-between">
         <button
           type="button"
-          onClick={() => {
-            // Phase 2: route to a real "change number" flow.
-            setPin("");
-            setError(false);
-          }}
-          className="text-sm font-semibold text-primary"
+          onClick={() => navigate(-1)}
+          aria-label="Go back"
+          className="text-white/90"
         >
-          Not you?
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
+        <span className="flex items-center gap-1.5 rounded-full bg-slate-800 px-3 py-1.5 text-sm font-semibold text-amber-400">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8z"/></svg>
+          {maskPhone(MOCK_PHONE)}
+        </span>
       </div>
 
+      {/* Avatar */}
+      <div className="mt-10 flex h-24 w-24 items-center justify-center rounded-3xl border-4 border-slate-800 bg-blue-600">
+        <span className="text-2xl font-bold text-white">{initials}</span>
+      </div>
+
+      {/* Phone pill under avatar */}
+      <span className="mt-4 flex items-center gap-1.5 rounded-full bg-slate-800 px-3 py-1.5 text-sm font-semibold text-amber-400">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8z"/></svg>
+        {maskPhone(MOCK_PHONE)}
+      </span>
+
+      <h2 className="mt-6 text-3xl font-extrabold text-white">Welcome back!</h2>
+      <p className="mt-1 text-base text-white/60">Enter your {PIN_LENGTH} digit passcode</p>
+
       {/* Hidden numeric input: drives the real keyboard, paste, and
-          autofill. Visually represented by the dots below. */}
+          autofill. Visually represented by the boxes below. */}
       <label htmlFor="pin-input" className="sr-only">
-        Enter your {PIN_LENGTH}-digit PIN
+        Enter your {PIN_LENGTH}-digit passcode
       </label>
       <input
         ref={inputRef}
@@ -114,41 +126,48 @@ export default function Login() {
         className="sr-only"
       />
 
-      {/* PIN dots (tapping refocuses the hidden input) */}
+      {/* Passcode boxes (tapping refocuses the hidden input) */}
       <button
         type="button"
         aria-hidden="true"
         tabIndex={-1}
         onClick={() => inputRef.current?.focus()}
-        className={`mt-8 flex gap-4 ${shake ? "animate-shake" : ""}`}
+        className={`mt-8 grid w-full max-w-sm grid-cols-6 gap-2 rounded-2xl bg-slate-900 p-3 ${
+          shake ? "animate-shake" : ""
+        }`}
       >
-        {Array.from({ length: PIN_LENGTH }).map((_, i) => (
-          <span
-            key={i}
-            className={`h-3.5 w-3.5 rounded-full border-2 transition-colors ${
-              i < pin.length
-                ? error
-                  ? "border-danger bg-danger"
-                  : "border-primary bg-primary"
-                : "border-ink/20 bg-transparent"
-            }`}
-          />
-        ))}
+        {Array.from({ length: PIN_LENGTH }).map((_, i) => {
+          const filled = i < pin.length;
+          const active = i === pin.length;
+          return (
+            <span
+              key={i}
+              className={`flex h-14 items-center justify-center rounded-xl border-2 text-xl font-semibold text-white transition-colors ${
+                active
+                  ? "border-amber-400 bg-slate-800"
+                  : error
+                  ? "border-red-500 bg-slate-800"
+                  : "border-transparent bg-slate-800"
+              }`}
+            >
+              {filled ? "•" : ""}
+            </span>
+          );
+        })}
       </button>
 
       <p
         role="status"
         aria-live="polite"
-        className={`mt-3 text-sm font-medium text-danger transition-opacity ${
+        className={`mt-3 text-sm font-medium text-red-400 transition-opacity ${
           error ? "opacity-100" : "opacity-0"
         }`}
       >
-        {error ? "Incorrect PIN, try again" : ""}
+        {error ? "Incorrect passcode, try again" : ""}
       </p>
 
-      {/* Numeric keypad: backup for anyone who prefers tapping over the
-          native keyboard. */}
-      <div className="mt-6 grid w-full max-w-xs grid-cols-3 gap-3">
+      {/* Numeric keypad */}
+      <div className="mt-8 grid w-full max-w-xs grid-cols-3 gap-4">
         {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((digit) => (
           <button
             key={digit}
@@ -156,40 +175,53 @@ export default function Login() {
             aria-label={`Digit ${digit}`}
             disabled={submitting}
             onClick={() => handleKeypadDigit(digit)}
-            className="rounded-2xl bg-ink/5 py-4 text-lg font-semibold text-ink transition active:scale-95 active:bg-ink/10 disabled:opacity-50"
+            className="flex aspect-square items-center justify-center rounded-full bg-slate-800 text-2xl font-bold text-white transition active:scale-95 active:bg-slate-700 disabled:opacity-50"
           >
             {digit}
           </button>
         ))}
-        <span />
-        <button
-          type="button"
-          aria-label="Digit 0"
-          disabled={submitting}
-          onClick={() => handleKeypadDigit("0")}
-          className="rounded-2xl bg-ink/5 py-4 text-lg font-semibold text-ink transition active:scale-95 active:bg-ink/10 disabled:opacity-50"
-        >
-          0
-        </button>
         <button
           type="button"
           aria-label="Delete last digit"
           disabled={submitting || pin.length === 0}
           onClick={handleBackspace}
-          className="rounded-2xl py-4 text-sm font-semibold text-ink/60 transition active:scale-95 active:bg-ink/10 disabled:opacity-30"
+          className="flex aspect-square items-center justify-center rounded-full bg-slate-800 text-white transition active:scale-95 active:bg-slate-700 disabled:opacity-30"
         >
-          Delete
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M21 4H8l-7 8 7 8h13a2 2 0 002-2V6a2 2 0 00-2-2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          aria-label="Digit 0"
+          disabled={submitting}
+          onClick={() => handleKeypadDigit("0")}
+          className="flex aspect-square items-center justify-center rounded-full bg-slate-800 text-2xl font-bold text-white transition active:scale-95 active:bg-slate-700 disabled:opacity-50"
+        >
+          0
+        </button>
+        <button
+          type="button"
+          aria-label="Submit passcode"
+          disabled={submitting || pin.length !== PIN_LENGTH}
+          onClick={submit}
+          className="flex aspect-square items-center justify-center rounded-full bg-slate-800 text-white transition active:scale-95 active:bg-slate-700 disabled:opacity-30"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       </div>
 
       <button
         type="button"
         onClick={() => {
-          // Phase 2: route to a real "forgot PIN" flow.
+          // Phase 2: route to a real "forgot passcode" flow.
         }}
-        className="mt-8 text-sm font-semibold text-primary"
+        className="mt-8 text-sm font-semibold text-amber-400"
       >
-        Forgot PIN?
+        Forgot passcode?
       </button>
     </div>
   );
