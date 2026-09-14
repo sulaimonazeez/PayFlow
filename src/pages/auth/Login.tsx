@@ -53,7 +53,7 @@ export default function Login() {
     setError(false);
     setPin(digits);
     if (digits.length > pin.length) vibrate(10);
-    if (digits.length === PIN_LENGTH) submit(digits);
+    if (digits.length === PIN_LENGTH) submit();
   };
 
   const handleKeypadDigit = (digit: string) => {
