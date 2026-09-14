@@ -30,7 +30,7 @@ export default function Login() {
 
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
-  const [shake, setShake] = useState(false);
+  const [shake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Autofocus the hidden input so the OS keyboard is ready immediately.
@@ -38,7 +38,7 @@ export default function Login() {
     inputRef.current?.focus();
   }, []);
 
-  const submit = (value: string) => {
+  const submit = () => {
     setSubmitting(true);
     // No backend yet: any complete PIN is accepted.
     setTimeout(() => {
