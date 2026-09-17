@@ -19,16 +19,6 @@ function hoursAgo(hours: number): string {
 const SEED_TRANSACTIONS: Transaction[] = [
   {
     id: generateReference(),
-    type: "credit",
-    category: "transfer",
-    title: "Transfer received",
-    subtitle: "From Ibrahim Adeyemi",
-    amount: 620000,
-    status: "successful",
-    date: hoursAgo(0.3),
-  },
-  {
-    id: generateReference(),
     type: "debit",
     category: "transfer",
     title: "Transfer",
@@ -46,6 +36,16 @@ const SEED_TRANSACTIONS: Transaction[] = [
     amount: 250000,
     status: "successful",
     date: hoursAgo(2),
+  },
+  {
+    id: generateReference(),
+    type: "credit",
+    category: "transfer",
+    title: "Transfer received",
+    subtitle: "From Ibrahim Adeyemi",
+    amount: 620000,
+    status: "successful",
+    date: "2026-09-14T10:00:00.000Z",
   },
   {
     id: generateReference(),
