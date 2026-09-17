@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import type {
   Transaction,
   TransactionType,
@@ -43,36 +42,31 @@ function generateReference(): string {
   return `${timePart}${randomPart}`;
 }
 
-export const useWalletStore = create<WalletState>()(
-  persist(
-    (set, get) => ({
-      balance: STARTING_BALANCE,
-      transactions: [],
-      hydrated: false,
+export const useWalletStore = create<WalletState>()((set, get) => ({
+  balance: STARTING_BALANCE,
+  transactions: [],
+  hydrated: false,
 
-      hydrate: async () => {
-        if (get().hydrated) return;
-        const seed = await transactionService.listTransactions();
-        const balance = seed.reduce(
-          (sum, t) => applyDelta(sum, t.type, t.amount),
-          STARTING_BALANCE,
-        );
-        set({ transactions: seed, balance, hydrated: true });
-      },
+  hydrate: async () => {
+    if (get().hydrated) return;
+    const seed = await transactionService.listTransactions();
+    const balance = seed.reduce(
+      (sum, t) => applyDelta(sum, t.type, t.amount),
+      STARTING_BALANCE,
+    );
+    set({ transactions: seed, balance, hydrated: true });
+  },
 
-      addTransaction: (input) => {
-        const transaction: Transaction = {
-          id: generateReference(),
-          status: input.status ?? "successful",
-          date: new Date().toISOString(),
-          ...input,
-        };
-        set((state) => ({
-          transactions: [transaction, ...state.transactions],
-          balance: applyDelta(state.balance, transaction.type, transaction.amount),
-        }));
-      },
-    }),
-    { name: "payflow-wallet" },
-  ),
-);
+  addTransaction: (input) => {
+    const transaction: Transaction = {
+      id: generateReference(),
+      status: input.status ?? "successful",
+      date: new Date().toISOString(),
+      ...input,
+    };
+    set((state) => ({
+      transactions: [transaction, ...state.transactions],
+      balance: applyDelta(state.balance, transaction.type, transaction.amount),
+    }));
+  },
+}));
