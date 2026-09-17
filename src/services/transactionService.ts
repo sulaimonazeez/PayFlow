@@ -39,6 +39,16 @@ const SEED_TRANSACTIONS: Transaction[] = [
   },
   {
     id: generateReference(),
+    type: "debit",
+    category: "transfer",
+    title: "Transfer",
+    subtitle: "To Lateefat Biola Olarewaju",
+    amount: 5000,
+    status: "pending",
+    date: "2026-09-17T18:25:00.000-04:00",
+  },
+  {
+    id: generateReference(),
     type: "credit",
     category: "transfer",
     title: "Transfer received",
