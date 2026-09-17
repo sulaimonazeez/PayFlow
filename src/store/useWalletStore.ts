@@ -8,7 +8,7 @@ import type {
 } from "@/types/transaction";
 import { transactionService } from "@/services/transactionService";
 
-const STARTING_BALANCE = 125450;
+const STARTING_BALANCE = 404500;
 
 interface NewTransactionInput {
   type: TransactionType;
