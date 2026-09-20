@@ -90,6 +90,16 @@ const SEED_TRANSACTIONS: Transaction[] = [
   {
     id: generateReference(),
     type: "debit",
+    category: "electricity",
+    title: "Electricity bill",
+    subtitle: "EKEDC • Prepaid meter",
+    amount: 3000,
+    status: "successful",
+    date: "2026-09-18T10:00:00.000+01:00",
+  },
+  {
+    id: generateReference(),
+    type: "debit",
     category: "cable",
     title: "Cable subscription",
     subtitle: "DStv • Compact bouquet",
